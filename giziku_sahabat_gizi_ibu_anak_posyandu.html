@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GIZIKU - Pemantauan Gizi Ibu, Anak & Layanan Posyandu</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            sage: {
+              50: '#f3f8f5',
+              100: '#e2efe7',
+              200: '#c5dfd0',
+              300: '#9cc5af',
+              400: '#6ea489',
+              500: '#4b866b',
+              600: '#376a54',
+              700: '#2d5544',
+              800: '#264438',
+              900: '#20382f',
+            },
+            peach: {
+              50: '#fff8f3',
+              100: '#ffeedf',
+              200: '#ffd9bc',
+              300: '#ffbd8e',
+              400: '#ff9657',
+              500: '#fd762d',
+            },
+            cream: '#faf9f5'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #faf9f5;
+      color: #1f2937;
+    }
+    .tab-transition {
+      animation: fadeSlideUp 0.3s ease-out;
+    }
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #9cc5af;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4b866b;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-sage-200 selection:text-sage-900">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Top Navbar -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-sage-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 md:h-20">
+        <!-- Brand Logo -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('gizi')">
+          <div class="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-gradient-to-br from-sage-500 to-emerald-600 flex items-center justify-center text-white shadow-md shadow-sage-200">
+            <i class="fa-solid fa-seedling text-lg md:text-xl"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-display font-extrabold text-xl md:text-2xl tracking-tight text-sage-800">GIZIKU</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 rounded-full">Posyandu Digital</span>
+            </div>
+            <p class="text-xs text-slate-500 hidden sm:block">Sahabat Gizi Ibu, Balita & Keluarga Sehat</p>
+          </div>
+        </div>
+
+        <!-- Desktop Quick Actions -->
+        <div class="hidden md:flex items-center gap-3">
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-sage-50 rounded-full border border-sage-200 text-xs font-medium text-sage-700">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Posyandu Melati RW 04 • Aktif</span>
+          </div>
+          <button onclick="switchTab('whatsapp')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-all cursor-pointer">
+            <i class="fa-brands fa-whatsapp text-base"></i>
+            <span>Channel WhatsApp</span>
+          </button>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <div class="flex md:hidden items-center gap-2">
+          <button onclick="switchTab('whatsapp')" class="p-2.5 rounded-xl bg-emerald-600 text-white shadow-sm" aria-label="Channel WhatsApp">
+            <i class="fa-brands fa-whatsapp text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 5 Main Feature Tabs Navigation -->
+      <nav aria-label="Menu Utama GIZIKU" class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 no-scrollbar border-t border-slate-100">
+        <button data-tab="gizi" onclick="switchTab('gizi')" class="nav-tab active flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer">
+          <i class="fa-solid fa-heart-pulse"></i>
+          <span>1. Informasi Gizi & Kesehatan</span>
+        </button>
+        <button data-tab="mpasi" onclick="switchTab('mpasi')" class="nav-tab flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer">
+          <i class="fa-solid fa-bowl-food"></i>
+          <span>2. Resep MPASI & Menu</span>
+        </button>
+        <button data-tab="imunisasi" onclick="switchTab('imunisasi')" class="nav-tab flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer">
+          <i class="fa-solid fa-syringe"></i>
+          <span>3. Imunisasi & Posyandu</span>
+        </button>
+        <button data-tab="forum" onclick="switchTab('forum')" class="nav-tab flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer">
+          <i class="fa-solid fa-comments"></i>
+          <span>4. Forum Konsultasi</span>
+        </button>
+        <button data-tab="whatsapp" onclick="switchTab('whatsapp')" class="nav-tab flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer">
+          <i class="fa-brands fa-whatsapp"></i>
+          <span>5. Channel WhatsApp</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Banner Summary -->
+  <section class="bg-gradient-to-r from-sage-700 via-sage-600 to-emerald-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-amber-200 text-xs font-semibold mb-3">
+            <i class="fa-solid fa-sparkles"></i>
+            <span>Cegah Stunting Sejak 1000 Hari Pertama Kehidupan</span>
+          </div>
+          <h1 class="font-display text-2xl sm:text-3xl font-extrabold tracking-tight leading-snug">
+            Pantau Gizi Buah Hati & Jadwal Posyandu Lebih Mudah
+          </h1>
+          <p class="mt-2 text-sage-100 text-sm sm:text-base leading-relaxed">
+            Akses panduan gizi seimbang, ide resep MPASI kaya protein hewani, pengingat jadwal imunisasi & Posyandu, hingga konsultasi langsung dengan Ahli Gizi & Bidan.
+          </p>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="grid grid-cols-3 gap-2.5 sm:gap-4 bg-white/10 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/20 shrink-0">
+          <div class="text-center px-2">
+            <div class="text-lg sm:text-2xl font-display font-extrabold text-amber-300" id="stat-imunisasi">0/12</div>
+            <div class="text-[11px] sm:text-xs text-sage-100">Imunisasi Tercatat</div>
+          </div>
+          <div class="text-center px-2 border-x border-white/20">
+            <div class="text-lg sm:text-2xl font-display font-extrabold text-white">8+</div>
+            <div class="text-[11px] sm:text-xs text-sage-100">Resep MPASI Gizi</div>
+          </div>
+          <div class="text-center px-2">
+            <div class="text-lg sm:text-2xl font-display font-extrabold text-emerald-200" id="stat-forum">4</div>
+            <div class="text-[11px] sm:text-xs text-sage-100">Diskusi Aktif</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- =================================================================== -->
+    <!-- FITUR 1: INFORMASI GIZI & KESEHATAN                                 -->
+    <!-- =================================================================== -->
+    <section id="section-gizi" class="tab-section tab-transition space-y-8">
+      <!-- Kalkulator Status Gizi / IMT & Kebutuhan Energi -->
+      <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-sage-100">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+          <div>
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-sage-600 bg-sage-50 px-3 py-1 rounded-full">
+              <i class="fa-solid fa-calculator"></i> Alat Bantu Interaktif
+            </span>
+            <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-800 mt-2">
+              Kalkulator Status Gizi (IMT) & Estimasi Kalori Harian
+            </h2>
+            <p class="text-sm text-slate-500 mt-1">
+              Hitung Indeks Massa Tubuh (IMT) Ibu / Dewasa serta kebutuhan kalori harian (termasuk tambahan kalori Ibu Hamil / Menyusui).
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+          <!-- Form Input -->
+          <form id="bmi-form" onsubmit="calculateNutrition(event)" class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Berat Badan (kg)</label>
+              <input type="number" id="calc-weight" step="0.1" min="25" max="250" value="56" required
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Tinggi Badan (cm)</label>
+              <input type="number" id="calc-height" step="0.5" min="100" max="230" value="158" required
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Usia (tahun)</label>
+              <input type="number" id="calc-age" min="15" max="80" value="28" required
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kondisi Khusus</label>
+              <select id="calc-condition" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm bg-white">
+                <option value="normal">Dewasa / Wanita Tidak Hamil</option>
+                <option value="hamil1">Ibu Hamil Trimester 1 (+180 kkal)</option>
+                <option value="hamil23">Ibu Hamil Trimester 2 & 3 (+300 kkal)</option>
+                <option value="busui1">Ibu Menyusui 0-6 Bulan (+330 kkal)</option>
+                <option value="busui2">Ibu Menyusui 7-12 Bulan (+400 kkal)</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2 pt-1">
+              <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-sage-600 hover:bg-sage-700 text-white font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Hitung Status Gizi & Kalori</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Result Box -->
+          <div id="bmi-result-box" class="lg:col-span-5 bg-gradient-to-br from-sage-50 to-amber-50/70 rounded-2xl p-5 border border-sage-200 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hasil Analisis Gizi</span>
+                <span id="bmi-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Normal / Ideal</span>
+              </div>
+              <div class="mt-3 flex items-baseline gap-3">
+                <span id="bmi-value" class="font-display text-3xl sm:text-4xl font-extrabold text-sage-800">22.4</span>
+                <span class="text-xs text-slate-500">kg/m² (Standar Kemenkes RI)</span>
+              </div>
+              <div class="mt-4 pt-3 border-t border-sage-200/70 flex items-center justify-between">
+                <span class="text-xs font-medium text-slate-600">Estimasi Kebutuhan Kalori:</span>
+                <span id="calorie-value" class="font-display text-lg font-bold text-amber-700">1.950 kkal/hari</span>
+              </div>
+            </div>
+            <p id="bmi-advice" class="mt-3 text-xs text-slate-600 leading-relaxed bg-white/80 p-3 rounded-xl border border-sage-100">
+              Status gizi Anda tergolong ideal. Pertahankan pola makan bergizi seimbang sesuai panduan <strong>Isi Piringku</strong> dan cukupi kebutuhan cairan 2 liter/hari.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Artikel Edukasi Gizi Seimbang -->
+      <div class="space-y-5">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-800">
+              Artikel Edukasi Gizi & Kesehatan Keluarga
+            </h2>
+            <p class="text-sm text-slate-500 mt-1">Pilih kategori atau cari topik seputar pencegahan stunting, Isi Piringku, dan gizi ibu.</p>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative w-full md:w-72">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="text" id="article-search" oninput="renderArticles()" placeholder="Cari artikel gizi..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm" />
+          </div>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex flex-wrap gap-2" id="article-filters">
+          <button onclick="setArticleCategory('Semua')" class="article-cat-btn active px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer">Semua Topik</button>
+          <button onclick="setArticleCategory('Isi Piringku')" class="article-cat-btn px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer">Isi Piringku</button>
+          <button onclick="setArticleCategory('Cegah Stunting')" class="article-cat-btn px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer">Cegah Stunting</button>
+          <button onclick="setArticleCategory('Ibu Hamil & Menyusui')" class="article-cat-btn px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer">Ibu Hamil & Menyusui</button>
+          <button onclick="setArticleCategory('Zat Besi & Anemia')" class="article-cat-btn px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer">Zat Besi & Anemia</button>
+        </div>
+
+        <!-- Articles Grid -->
+        <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- FITUR 2: RESEP MPASI & VARIASI MENU                                 -->
+    <!-- =================================================================== -->
+    <section id="section-mpasi" class="tab-section hidden tab-transition space-y-6">
+      <div class="bg-gradient-to-r from-amber-50 via-peach-50 to-sage-50 rounded-3xl p-5 sm:p-7 border border-amber-200/70">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
+              <i class="fa-solid fa-utensils"></i> Standar Gizi Kemenkes & WHO
+            </span>
+            <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-800 mt-2">
+              Resep MPASI Kaya Protein Hewani & Menu Keluarga
+            </h2>
+            <p class="text-sm text-slate-600 mt-1 max-w-2xl">
+              Variasi menu bergizi lengkap sesuai tekstur dan tahapan usia si kecil untuk mendukung pertumbuhan otak dan mencegah stunting.
+            </p>
+          </div>
+          <!-- Search Menu -->
+          <div class="relative w-full md:w-72 shrink-0">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="text" id="recipe-search" oninput="renderRecipes()" placeholder="Cari bahan (misal: hati ayam, ikan)..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-amber-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm" />
+          </div>
+        </div>
+
+        <!-- Age Group Filter -->
+        <div class="flex flex-wrap gap-2 mt-5" id="recipe-filters">
+          <button onclick="setRecipeAge('Semua')" class="recipe-age-btn active px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer">Semua Usia</button>
+          <button onclick="setRecipeAge('6-8 Bulan')" class="recipe-age-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer">6–8 Bulan (Lumat/Saring)</button>
+          <button onclick="setRecipeAge('9-11 Bulan')" class="recipe-age-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer">9–11 Bulan (Cincang Halus)</button>
+          <button onclick="setRecipeAge('12-23 Bulan')" class="recipe-age-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer">12–23 Bulan (Makanan Keluarga)</button>
+          <button onclick="setRecipeAge('Menu Keluarga')" class="recipe-age-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer">Menu Keluarga Sehat</button>
+        </div>
+      </div>
+
+      <!-- Recipes Grid -->
+      <div id="recipes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- FITUR 3: INFORMASI IMUNISASI & JADWAL POSYANDU                      -->
+    <!-- =================================================================== -->
+    <section id="section-imunisasi" class="tab-section hidden tab-transition space-y-8">
+      <!-- Jadwal Posyandu Bulanan -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-sage-600">Agenda Wilayah Terdekat</span>
+            <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-800">
+              Jadwal Kegiatan Posyandu Bulan Ini
+            </h2>
+          </div>
+          <span class="text-xs text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200">
+            <i class="fa-regular fa-bell text-amber-500 mr-1"></i> Klik "Ingatkan Saya" untuk aktivasi notifikasi
+          </span>
+        </div>
+
+        <div id="posyandu-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Checklist / Timeline Imunisasi Dasar & Lanjutan -->
+      <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-sage-100">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+          <div>
+            <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-800">
+              Kartu Pantau Imunisasi Dasar & Lanjutan (0–24 Bulan)
+            </h2>
+            <p class="text-sm text-slate-500 mt-1">
+              Centang jenis imunisasi yang sudah didapatkan si kecil untuk mencatat riwayat secara otomatis di perangkat Anda.
+            </p>
+          </div>
+          <div class="flex items-center gap-3 bg-sage-50 px-4 py-2.5 rounded-2xl border border-sage-200 shrink-0">
+            <div>
+              <div class="text-[11px] font-semibold text-sage-700">Kelengkapan Imunisasi</div>
+              <div class="flex items-center gap-2 mt-1">
+                <div class="w-28 h-2.5 bg-sage-200 rounded-full overflow-hidden">
+                  <div id="immunization-progress-bar" class="h-full bg-sage-600 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <span id="immunization-percent" class="text-xs font-bold text-sage-800">0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="immunization-list" class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- FITUR 4: FORUM KONSULTASI                                           -->
+    <!-- =================================================================== -->
+    <section id="section-forum" class="tab-section hidden tab-transition space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Form Buat Pertanyaan Baru -->
+        <div class="lg:col-span-4 bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-sage-100 lg:sticky lg:top-36">
+          <div class="flex items-center gap-2.5 mb-3">
+            <div class="w-9 h-9 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center">
+              <i class="fa-solid fa-user-doctor"></i>
+            </div>
+            <div>
+              <h3 class="font-display font-bold text-base text-slate-800">Tanya Ahli Gizi & Bidan</h3>
+              <p class="text-xs text-slate-500">Gratis & ramah keluarga</p>
+            </div>
+          </div>
+
+          <form id="forum-form" onsubmit="submitQuestion(event)" class="space-y-3.5 mt-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Bunda / Ayah</label>
+              <input type="text" id="q-author" placeholder="Contoh: Bunda Rina (Ibu Kenzo, 8 bln)" required
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Topik Konsultasi</label>
+              <select id="q-category" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm bg-white">
+                <option value="MPASI">MPASI & Susah Makan (GTM)</option>
+                <option value="Tumbuh Kembang">Tumbuh Kembang & Berat Badan</option>
+                <option value="Imunisasi">Imunisasi & KIPI</option>
+                <option value="Kesehatan Ibu">Kesehatan Ibu Hamil & Menyusui</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Pertanyaan</label>
+              <input type="text" id="q-title" placeholder="Contoh: Cara mengatasi anak GTM saat tumbuh gigi?" required
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Detail Pertanyaan</label>
+              <textarea id="q-body" rows="3" placeholder="Ceritakan usia anak, keluhan, atau kebiasaan makannya..." required
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-200 outline-none text-sm"></textarea>
+            </div>
+            <button type="submit" class="w-full py-3 rounded-xl bg-sage-600 hover:bg-sage-700 text-white font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Kirim Pertanyaan</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Daftar Diskusi -->
+        <div class="lg:col-span-8 space-y-4">
+          <div class="bg-white rounded-2xl p-4 border border-sage-100 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap gap-1.5" id="forum-filters">
+              <button onclick="setForumCategory('Semua')" class="forum-cat-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">Semua</button>
+              <button onclick="setForumCategory('MPASI')" class="forum-cat-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">MPASI</button>
+              <button onclick="setForumCategory('Tumbuh Kembang')" class="forum-cat-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">Tumbuh Kembang</button>
+              <button onclick="setForumCategory('Imunisasi')" class="forum-cat-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">Imunisasi</button>
+              <button onclick="setForumCategory('Kesehatan Ibu')" class="forum-cat-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">Kesehatan Ibu</button>
+            </div>
+            <span class="text-xs text-slate-500 font-medium"><i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i>Terverifikasi Nakes</span>
+          </div>
+
+          <div id="forum-list" class="space-y-4">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- FITUR 5: TAUTAN CHANNEL WHATSAPP                                    -->
+    <!-- =================================================================== -->
+    <section id="section-whatsapp" class="tab-section hidden tab-transition">
+      <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-emerald-100">
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 sm:p-10 text-white">
+          <div class="max-w-3xl">
+            <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/20 text-xs font-bold mb-3">
+              <i class="fa-brands fa-whatsapp text-base"></i> Komunitas Resmi GIZIKU & Kader Posyandu
+            </span>
+            <h2 class="font-display text-2xl sm:text-3xl font-extrabold">
+              Gabung Channel WhatsApp GIZIKU
+            </h2>
+            <p class="mt-2 text-emerald-50 text-sm sm:text-base leading-relaxed">
+              Dapatkan pengingat otomatis jadwal Posyandu bulanan, resep MPASI harian, info stok vitamin A, serta pengumuman penting kesehatan langsung di WhatsApp Anda tanpa memenuhi memori grup!
+            </p>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <!-- Left: QR Code & Action Buttons -->
+          <div class="lg:col-span-5 flex flex-col items-center text-center bg-sage-50/70 p-6 rounded-3xl border border-sage-200">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+              <!-- Custom SVG QR Code Visual -->
+              <svg class="w-44 h-44 text-slate-800" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="QR Code Channel WhatsApp GIZIKU">
+                <rect width="120" height="120" rx="8" fill="white"/>
+                <!-- Top Left Finder -->
+                <rect x="10" y="10" width="30" height="30" rx="4" stroke="#1f2937" stroke-width="6"/>
+                <rect x="19" y="19" width="12" height="12" rx="2" fill="#059669"/>
+                <!-- Top Right Finder -->
+                <rect x="80" y="10" width="30" height="30" rx="4" stroke="#1f2937" stroke-width="6"/>
+                <rect x="89" y="19" width="12" height="12" rx="2" fill="#059669"/>
+                <!-- Bottom Left Finder -->
+                <rect x="10" y="80" width="30" height="30" rx="4" stroke="#1f2937" stroke-width="6"/>
+                <rect x="19" y="89" width="12" height="12" rx="2" fill="#059669"/>
+                <!-- Data Modules -->
+                <rect x="50" y="12" width="6" height="6" fill="#1f2937"/>
+                <rect x="62" y="12" width="6" height="12" fill="#1f2937"/>
+                <rect x="50" y="24" width="6" height="12" fill="#1f2937"/>
+                <rect x="12" y="50" width="12" height="6" fill="#1f2937"/>
+                <rect x="30" y="50" width="6" height="12" fill="#1f2937"/>
+                <rect x="12" y="62" width="12" height="6" fill="#1f2937"/>
+                <rect x="50" y="50" width="20" height="20" rx="4" fill="#059669"/>
+                <path d="M56 60L59 63L65 57" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="78" y="50" width="6" height="12" fill="#1f2937"/>
+                <rect x="90" y="50" width="18" height="6" fill="#1f2937"/>
+                <rect x="84" y="66" width="12" height="6" fill="#1f2937"/>
+                <rect x="102" y="62" width="6" height="12" fill="#1f2937"/>
+                <rect x="50" y="80" width="6" height="18" fill="#1f2937"/>
+                <rect x="62" y="86" width="12" height="6" fill="#1f2937"/>
+                <rect x="50" y="104" width="18" height="6" fill="#1f2937"/>
+                <rect x="80" y="80" width="12" height="12" fill="#1f2937"/>
+                <rect x="98" y="80" width="10" height="6" fill="#1f2937"/>
+                <rect x="80" y="98" width="6" height="10" fill="#1f2937"/>
+                <rect x="92" y="94" width="16" height="14" fill="#1f2937"/>
+              </svg>
+            </div>
+            <p class="text-xs font-semibold text-slate-700 mt-3">Pindai QR Code dengan Kamera HP</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">whatsapp.com/channel/giziku-posyandu-id</p>
+
+            <div class="w-full flex flex-col sm:flex-row gap-2.5 mt-5">
+              <a href="https://whatsapp.com/channel/" target="_blank" rel="noopener noreferrer"
+                onclick="showToast('Membuka tautan Channel WhatsApp GIZIKU...', 'success')"
+                class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-all">
+                <i class="fa-brands fa-whatsapp text-base"></i>
+                <span>Gabung Channel</span>
+              </a>
+              <button onclick="copyWhatsAppLink()"
+                class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-sm font-semibold transition-all cursor-pointer">
+                <i class="fa-regular fa-copy"></i>
+                <span>Salin Tautan</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Channel Preview Messages -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-display font-bold text-lg text-slate-800">
+                Pratinjau Info yang Dibagikan di Channel
+              </h3>
+              <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
+                12.4K Pengikut Aktif
+              </span>
+            </div>
+
+            <!-- Simulated WhatsApp Channel Feed -->
+            <div class="bg-[#efeae2] rounded-2xl p-4 sm:p-5 space-y-3.5 border border-slate-200">
+              <!-- Message 1 -->
+              <div class="bg-white rounded-2xl rounded-tl-none p-4 shadow-sm max-w-lg">
+                <div class="flex items-center justify-between text-[11px] font-bold text-emerald-700 mb-1">
+                  <span>📢 INFO POSYANDU & VITAMIN A</span>
+                  <span class="text-slate-400 font-normal">08:00 WIB</span>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  Selamat pagi Ayah & Bunda! Jangan lupa besok jadwal <strong>Penimbangan Balita & Pemberian Vitamin A</strong> di Posyandu Melati RW 04 pukul 08.00–11.00 WIB. Bawa Buku KIA ya! 📘✨
+                </p>
+                <div class="mt-2 flex items-center gap-2 text-[11px] text-slate-500">
+                  <span class="bg-slate-100 px-2 py-0.5 rounded-full">❤️ 148</span>
+                  <span class="bg-slate-100 px-2 py-0.5 rounded-full">👍 92</span>
+                </div>
+              </div>
+
+              <!-- Message 2 -->
+              <div class="bg-white rounded-2xl rounded-tl-none p-4 shadow-sm max-w-lg">
+                <div class="flex items-center justify-between text-[11px] font-bold text-amber-700 mb-1">
+                  <span>🍲 IDE MENU MPASI HARI INI</span>
+                  <span class="text-slate-400 font-normal">10:15 WIB</span>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  Bingung masak apa untuk si kecil usia 9–11 bulan? Yuk coba <strong>Tim Nasi Hati Ayam & Bayam Santan</strong>! Kaya zat besi heme untuk cegah anemia dan bantu kenaikan berat badan (BB) anak. Cek resep lengkapnya di tab <em>Resep MPASI</em> GIZIKU!
+                </p>
+                <div class="mt-2 flex items-center gap-2 text-[11px] text-slate-500">
+                  <span class="bg-slate-100 px-2 py-0.5 rounded-full">😋 210</span>
+                  <span class="bg-slate-100 px-2 py-0.5 rounded-full">🙏 64</span>
+                </div>
+              </div>
+
+              <!-- Message 3 -->
+              <div class="bg-white rounded-2xl rounded-tl-none p-4 shadow-sm max-w-lg">
+                <div class="flex items-center justify-between text-[11px] font-bold text-rose-600 mb-1">
+                  <span>🩺 LAYANAN KONSULTASI DARURAT</span>
+                  <span class="text-slate-400 font-normal">Kemarin</span>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  Jika balita mengalami demam tinggi >38.5°C pasca imunisasi atau diare disertai tanda dehidrasi, segera hubungi Puskesmas terdekat atau konsultasikan melalui layanan 119.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating WhatsApp Quick Access Button -->
+  <button onclick="switchTab('whatsapp')" aria-label="Buka Channel WhatsApp GIZIKU"
+    class="fixed bottom-5 right-5 z-40 group flex items-center gap-2.5 bg-emerald-600 hover:bg-emerald-700 text-white pl-4 pr-4 sm:pr-5 py-3.5 rounded-full shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 cursor-pointer">
+    <i class="fa-brands fa-whatsapp text-2xl"></i>
+    <span class="hidden sm:inline text-xs font-bold tracking-wide">Channel WA GIZIKU</span>
+  </button>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-sage-100 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <div class="flex items-center gap-2">
+        <span class="font-display font-bold text-sage-800 text-sm">GIZIKU</span>
+        <span>• Platform Edukasi Gizi Ibu, Anak & Posyandu Digital</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-4">
+        <button onclick="switchTab('gizi')" class="hover:text-sage-700 cursor-pointer">Info Gizi</button>
+        <button onclick="switchTab('mpasi')" class="hover:text-sage-700 cursor-pointer">Resep MPASI</button>
+        <button onclick="switchTab('imunisasi')" class="hover:text-sage-700 cursor-pointer">Jadwal Posyandu</button>
+        <button onclick="switchTab('forum')" class="hover:text-sage-700 cursor-pointer">Konsultasi</button>
+        <button onclick="switchTab('whatsapp')" class="hover:text-emerald-600 font-semibold cursor-pointer">Channel WhatsApp</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =================================================================== -->
+  <!-- MODAL POPUP (UNTUK ARTIKEL & RESEP MPASI)                           -->
+  <!-- =================================================================== -->
+  <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden animate-[fadeSlideUp_0.25s_ease-out]">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-sage-50/60">
+        <span id="modal-category" class="px-3 py-1 rounded-full text-xs font-bold bg-sage-100 text-sage-800">Kategori</span>
+        <button onclick="closeModal()" class="w-9 h-9 rounded-full bg-white hover:bg-slate-100 text-slate-500 flex items-center justify-center transition-colors cursor-pointer" aria-label="Tutup">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div id="modal-content" class="p-6 overflow-y-auto space-y-4 text-sm text-slate-700 leading-relaxed">
+        <!-- Dynamic Content -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+        <button onclick="closeModal()" class="px-5 py-2.5 rounded-xl bg-sage-600 hover:bg-sage-700 text-white font-semibold text-xs sm:text-sm transition-colors cursor-pointer">
+          Tutup Jendela
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- JAVASCRIPT APPLICATION LOGIC                                        -->
+  <!-- =================================================================== -->
+  <script>
+    // 1. DATA ARTIKEL EDUKASI GIZI
+    const ARTICLES_DATA = [
+      {
+        id: 1,
+        title: "Panduan 'Isi Piringku' untuk Balita & Keluarga Sehat",
+        category: "Isi Piringku",
+        readTime: "4 mnt baca",
+        icon: "fa-plate-wheat",
+        color: "bg-emerald-100 text-emerald-700",
+        summary: "Kenali komposisi ideal makanan sekali makan: karbohidrat, lauk pauk tinggi protein hewani, sayuran, dan buah-buahan.",
+        content: `
+          <h3 class="font-display text-xl font-bold text-slate-800">Panduan 'Isi Piringku' untuk Balita & Keluarga Sehat</h3>
+          <p class="text-slate-600">Konsep <strong>Isi Piringku</strong> dari Kementerian Kesehatan RI menggantikan slogan 4 Sehat 5 Sempurna dengan menekankan porsi gizi seimbang dalam satu kali makan.</p>
+          <div class="bg-sage-50 p-4 rounded-2xl border border-sage-200 space-y-2">
+            <h4 class="font-bold text-sage-800">Komposisi Utama dalam Satu Piring:</h4>
+            <ul class="list-disc pl-5 space-y-1 text-slate-700">
+              <li><strong>Makanan Pokok (Sumber Karbohidrat):</strong> Nasi, kentang, jagung, atau ubi sebagai sumber energi utama.</li>
+              <li><strong>Lauk Pauk (Prioritas Protein Hewani):</strong> Telur, ikan, ayam, daging sapi, atau hati ayam sangat krusial untuk pertumbuhan sel otak dan tinggi badan anak.</li>
+              <li><strong>Sayuran & Buah-buahan:</strong> Sumber vitamin, mineral, dan serat untuk menjaga daya tahan tubuh dan pencernaan.</li>
+            </ul>
+          </div>
+          <p><strong>Catatan Penting untuk Balita (6-23 Bulan):</strong> Kebutuhan lemak dan protein pada balita lebih tinggi dibanding orang dewasa secara proporsional. Jangan terlalu banyak memberikan serat sayur pada awal MPASI agar perut anak tidak cepat penuh sebelum zat gizi makro tercukupi.</p>
+        `
+      },
+      {
+        id: 2,
+        title: "Cegah Stunting Sejak 1000 Hari Pertama Kehidupan (HPK)",
+        category: "Cegah Stunting",
+        readTime: "5 mnt baca",
+        icon: "fa-child-reaching",
+        color: "bg-amber-100 text-amber-700",
+        summary: "1000 HPK dimulai sejak janin dalam kandungan hingga anak berusia 2 tahun. Simak langkah nyata mencegah gagal tumbuh.",
+        content: `
+          <h3 class="font-display text-xl font-bold text-slate-800">Cegah Stunting Sejak 1000 Hari Pertama Kehidupan (HPK)</h3>
+          <p>Stunting adalah kondisi gagal tumbuh pada anak balita akibat kekurangan gizi kronis dan infeksi berulang terutama pada periode <strong>1000 HPK</strong> (270 hari selama kehamilan + 730 hari hingga anak berusia 2 tahun).</p>
+          <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 space-y-2">
+            <h4 class="font-bold text-amber-900">5 Langkah Kunci Pencegahan Stunting:</h4>
+            <ol class="list-decimal pl-5 space-y-1.5 text-slate-700">
+              <li>Ibu hamil rutin minum Tablet Tambah Darah (TTD) minimal 90 tablet selama kehamilan.</li>
+              <li>Inisiasi Menyusu Dini (IMD) dan ASI Eksklusif selama 6 bulan penuh.</li>
+              <li>Pemberian MPASI kaya protein hewani (minimal 1 butir telur/hari) mulai usia 6 bulan.</li>
+              <li>Rutin memantau berat badan dan panjang/tinggi badan anak setiap bulan di Posyandu.</li>
+              <li>Menjaga sanitasi lingkungan, akses air bersih, dan melengkapi imunisasi dasar.</li>
+            </ol>
+          </div>
+        `
+      },
+      {
+        id: 3,
+        title: "Nutrisi Optimal Ibu Hamil & Menyusui agar ASI Melimpah",
+        category: "Ibu Hamil & Menyusui",
+        readTime: "4 mnt baca",
+        icon: "fa-person-breastfeeding",
+        color: "bg-rose-100 text-rose-700",
+        summary: "Kebutuhan kalori, asam folat, kalsium, dan cairan meningkat saat hamil dan menyusui. Ketahui sumber makanan terbaiknya.",
+        content: `
+          <h3 class="font-display text-xl font-bold text-slate-800">Nutrisi Optimal Ibu Hamil & Menyusui agar ASI Melimpah</h3>
+          <p>Kualitas kesehatan janin dan kelancaran produksi ASI sangat dipengaruhi oleh kecukupan gizi ibu setiap hari.</p>
+          <ul class="list-disc pl-5 space-y-2 text-slate-700">
+            <li><strong>Asam Folat & DHA:</strong> Penting untuk perkembangan tabung saraf dan otak janin (ditemukan pada ikan kembung, telur, alpukat, bayam).</li>
+            <li><strong>Kalsium & Vitamin D:</strong> Mendukung pembentukan tulang bayi dan menjaga kepadatan tulang ibu (susu, teri nasi, tahu, tempe).</li>
+            <li><strong>Hidrasi Cukup:</strong> Ibu menyusui disarankan minum 2,5 hingga 3 liter air putih per hari agar produksi ASI tetap lancar.</li>
+          </ul>
+        `
+      },
+      {
+        id: 4,
+        title: "Mengapa Zat Besi Penting untuk Kecerdasan & Imunitas Anak?",
+        category: "Zat Besi & Anemia",
+        readTime: "3 mnt baca",
+        icon: "fa-droplet",
+        color: "bg-teal-100 text-teal-700",
+        summary: "Cadangan zat besi bayi mulai menipis di usia 6 bulan. Kenali sumber zat besi heme yang mudah diserap tubuh.",
+        content: `
+          <h3 class="font-display text-xl font-bold text-slate-800">Mengapa Zat Besi Penting untuk Kecerdasan & Imunitas Anak?</h3>
+          <p>Memasuki usia 6 bulan, ASI saja sudah tidak mampu memenuhi kebutuhan zat besi harian bayi yang melonjak tajam. Kekurangan zat besi dapat menyebabkan anemia defisiensi besi yang berdampak pada konsentrasi dan imunitas.</p>
+          <div class="bg-teal-50 p-4 rounded-2xl border border-teal-200">
+            <h4 class="font-bold text-teal-900 mb-1">Tips Penyerapan Zat Besi Maksimal:</h4>
+            <p class="text-slate-700">Utamakan <strong>Zat Besi Heme</strong> dari sumber hewani seperti <em>hati ayam, daging sapi giling, ikan kembung, dan kuning telur</em>. Kombinasikan dengan makanan kaya Vitamin C (seperti tomat atau jeruk) dan hindari pemberian teh setelah makan karena tanin dapat menghambat penyerapan zat besi.</p>
+          </div>
+        `
+      },
+      {
+        id: 5,
+        title: "Mengatasi Gerakan Tutup Mulut (GTM) pada Balita Tanpa Stres",
+        category: "Isi Piringku",
+        readTime: "4 mnt baca",
+        icon: "fa-face-smile-beam",
+        color: "bg-indigo-100 text-indigo-700",
+        summary: "Terapkan Feeding Rules secara konsisten untuk membantu anak mengenali rasa lapar dan kenyang secara alami.",
+        content: `
+          <h3 class="font-display text-xl font-bold text-slate-800">Mengatasi Gerakan Tutup Mulut (GTM) pada Balita</h3>
+          <p>GTM sering membuat orang tua cemas. Terapkan prinsip <strong>Feeding Rules</strong> dari IDAI berikut ini:</p>
+          <ul class="list-disc pl-5 space-y-1.5 text-slate-700">
+            <li><strong>Jadwal Teratur:</strong> 3 kali makan utama dan 2 kali selingan bergizi dengan jarak 2-3 jam.</li>
+            <li><strong>Durasi Maksimal 30 Menit:</strong> Akhiri sesi makan meski porsi belum habis agar anak belajar disiplin waktu makan.</li>
+            <li><strong>Lingkungan Netral:</strong> Hindari menonton TV/gadget saat makan dan jangan memaksa atau memarahi anak.</li>
+            <li><strong>Variasi Tekstur & Aroma:</strong> Gunakan bumbu aromatik alami seperti bawang putih, daun salam, serai, dan kaldu ayam kampung.</li>
+          </ul>
+        `
+      },
+      {
+        id: 6,
+        title: "Membaca Grafik KMS (Kartu Menuju Sehat) di Buku KIA",
+        category: "Cegah Stunting",
+        readTime: "3 mnt baca",
+        icon: "fa-chart-line",
+        color: "bg-emerald-100 text-emerald-700",
+        summary: "Kenaikan berat badan sesuai pita pertumbuhan adalah indikator utama anak sehat. Pahami arti arah garis kurva KMS.",
+        content: `
+          <h3 class="font-display text-xl font-bold text-slate-800">Membaca Grafik KMS (Kartu Menuju Sehat)</h3>
+          <p>Setiap kali menimbang anak di Posyandu, pastikan kader mencatat titik berat badan di grafik KMS Buku KIA:</p>
+          <ul class="list-disc pl-5 space-y-1.5 text-slate-700">
+            <li><strong>Garis Naik (N):</strong> Berat badan naik mengikuti pita warna atau berpindah ke pita di atasnya (Pertumbuhan Baik).</li>
+            <li><strong>Garis Mendatar / Menurun (T):</strong> Berat badan tidak naik atau turun dibanding bulan lalu. Perlu evaluasi asupan MPASI dan konsultasi ke Puskesmas/Ahli Gizi.</li>
+          </ul>
+        `
+      }
+    ];
+
+    // 2. DATA RESEP MPASI & MENU KELUARGA
+    const RECIPES_DATA = [
+      {
+        id: 101,
+        title: "Bubur Saring Hati Ayam & Wortel Santan",
+        ageGroup: "6-8 Bulan",
+        prepTime: "25 Menit",
+        calories: "185 kkal",
+        protein: "11.5 g",
+        iron: "3.8 mg",
+        badgeColor: "bg-emerald-100 text-emerald-800",
+        iconBg: "from-amber-100 to-orange-100",
+        icon: "fa-bowl-rice",
+        ingredients: [
+          "40 gr beras putih (cuci bersih)",
+          "50 gr hati ayam kampung (rebus sebentar dengan daun salam & jahe untuk hilangkan bau amis)",
+          "25 gr wortel parut halus",
+          "30 ml santan kental segar (lemak tambahan)",
+          "150 ml kaldu ayam kampung",
+          "1 siung bawang putih & 1 butir bawang merah geprek"
+        ],
+        steps: [
+          "Tumis bawang putih dan bawang merah dengan sedikit minyak kelapa hingga harum.",
+          "Masukkan beras, kaldu ayam, dan hati ayam yang sudah dicincang halus. Masak hingga menjadi bubur lembut.",
+          "Masukkan wortel parut dan santan, aduk terus selama 5 menit hingga matang merata.",
+          "Saring menggunakan saringan kawat atau haluskan dengan blender sesuai kemampuan mengunyah bayi (tekstur lumat kental)."
+        ]
+      },
+      {
+        id: 102,
+        title: "Puree Ikan Kembung Kentang & Brokoli",
+        ageGroup: "6-8 Bulan",
+        prepTime: "20 Menit",
+        calories: "175 kkal",
+        protein: "12.0 g",
+        iron: "2.1 mg",
+        badgeColor: "bg-emerald-100 text-emerald-800",
+        iconBg: "from-sky-100 to-teal-100",
+        icon: "fa-fish",
+        ingredients: [
+          "50 gr daging ikan kembung segar (pisahkan duri dengan teliti)",
+          "60 gr kentang kupas potong dadu",
+          "20 gr kuntum brokoli hijau",
+          "1 sdt unsalted butter / minyak zaitun",
+          "1 lembar daun jeruk & air jeruk nipis"
+        ],
+        steps: [
+          "Lumuri ikan kembung dengan air jeruk nipis selama 10 menit, bilas bersih.",
+          "Kukus ikan kembung bersama daun jeruk, kentang, dan brokoli selama 15 menit hingga empuk.",
+          "Haluskan semua bahan bersama unsalted butter dan sedikit air hangat hingga mencapai kekentalan yang pas (tidak jatuh saat sendok dimiringkan)."
+        ]
+      },
+      {
+        id: 103,
+        title: "Nasi Tim Daging Sapi Cincang & Labu Siam",
+        ageGroup: "9-11 Bulan",
+        prepTime: "30 Menit",
+        calories: "240 kkal",
+        protein: "14.2 g",
+        iron: "3.2 mg",
+        badgeColor: "bg-amber-100 text-amber-800",
+        iconBg: "from-rose-100 to-amber-100",
+        icon: "fa-drumstick-bite",
+        ingredients: [
+          "60 gr nasi tim lembek",
+          "50 gr daging sapi giling tanpa lemak",
+          "30 gr labu siam cincang kecil",
+          "1 butir telur puyuh kocok lepas",
+          "150 ml kaldu sapi, 1 siung bawang putih halus, 1 sdt minyak wijen"
+        ],
+        steps: [
+          "Tumis bawang putih dengan minyak wijen, masukkan daging sapi giling hingga berubah warna.",
+          "Tuang kaldu sapi, masukkan labu siam dan nasi tim. Masak dengan api kecil hingga air menyusut.",
+          "Tuangkan telur puyuh kocok sambil diaduk cepat hingga berserabut matang. Sajikan hangat dengan tekstur cincang halus."
+        ]
+      },
+      {
+        id: 104,
+        title: "Perkedel Tahu Telur Ayam Kampung Kukus",
+        ageGroup: "9-11 Bulan",
+        prepTime: "25 Menit",
+        calories: "210 kkal",
+        protein: "13.0 g",
+        iron: "2.4 mg",
+        badgeColor: "bg-amber-100 text-amber-800",
+        iconBg: "from-yellow-100 to-amber-100",
+        icon: "fa-egg",
+        ingredients: [
+          "1 buah tahu putih ukuran sedang (haluskan)",
+          "40 gr daging ayam giling",
+          "1 butir telur ayam kampung",
+          "1 sdm daun bawang & seledri iris halus",
+          "1 siung bawang putih parut"
+        ],
+        steps: [
+          "Campurkan tahu halus, daging ayam giling, telur kocok, bawang putih, dan irisan daun bawang dalam mangkuk.",
+          "Masukkan ke dalam cetakan kecil tahan panas yang sudah diolesi sedikit minyak.",
+          "Kukus selama 20 menit hingga matang padat. Bisa langsung disajikan sebagai finger food bergizi."
+        ]
+      },
+      {
+        id: 105,
+        title: "Sup Bola Ayam Sayuran & Makaroni",
+        ageGroup: "12-23 Bulan",
+        prepTime: "25 Menit",
+        calories: "290 kkal",
+        protein: "16.5 g",
+        iron: "2.6 mg",
+        badgeColor: "bg-purple-100 text-purple-800",
+        iconBg: "from-emerald-100 to-lime-100",
+        icon: "fa-mug-hot",
+        ingredients: [
+          "70 gr dada & paha ayam giling",
+          "30 gr makaroni rebus",
+          "30 gr wortel & buncis potong kecil",
+          "1 sdm tepung tapioka",
+          "250 ml kaldu ayam bening, seledri, bawang goreng"
+        ],
+        steps: [
+          "Aduk ayam giling dengan tepung tapioka dan bawang putih halus, bentuk bola-bola kecil.",
+          "Didihkan kaldu ayam, masukkan bola ayam hingga mengapung.",
+          "Masukkan wortel, buncis, dan makaroni. Masak hingga sayuran empuk, taburi seledri dan bawang goreng."
+        ]
+      },
+      {
+        id: 106,
+        title: "Pepes Ikan Patin Kemangi & Tempe Kukus",
+        ageGroup: "Menu Keluarga",
+        prepTime: "35 Menit",
+        calories: "340 kkal",
+        protein: "22.0 g",
+        iron: "3.1 mg",
+        badgeColor: "bg-teal-100 text-teal-800",
+        iconBg: "from-teal-100 to-emerald-100",
+        icon: "fa-leaf",
+        ingredients: [
+          "2 potong ikan patin segar",
+          "50 gr tempe potong dadu kecil",
+          "1 ikat daun kemangi, 1 buah tomat iris",
+          "Bumbu halus: 3 bawang merah, 2 bawang putih, 2 butir kemiri, 1 cm kunyit, serai & daun salam"
+        ],
+        steps: [
+          "Lumuri potongan ikan patin dan tempe dengan bumbu halus hingga merata.",
+          "Siapkan daun pisang, tata daun salam, serai, ikan, tempe, irisan tomat, dan daun kemangi.",
+          "Bungkus rapi lalu kukus selama 30 menit hingga bumbu meresap dan ikan matang lembut. Cocok untuk balita 1 tahun ke atas dan seluruh keluarga."
+        ]
+      }
+    ];
+
+    // 3. DATA JADWAL POSYANDU & IMUNISASI
+    const POSYANDU_SCHEDULES = [
+      {
+        id: "pos-1",
+        title: "Penimbangan Balita, Pengukuran TB & PMT",
+        location: "Balai Posyandu Melati RW 04 (Kel. Jatimulyo)",
+        date: "Rabu, 03 Desember 2026",
+        time: "08.00 – 11.00 WIB",
+        tag: "Rutin Bulanan",
+        reminded: false
+      },
+      {
+        id: "pos-2",
+        title: "Kelas Ibu Hamil & Pemeriksaan ANC Terpadu",
+        location: "Aula Puskesmas Pembantu Sukun",
+        date: "Sabtu, 06 Desember 2026",
+        time: "08.30 – 11.30 WIB",
+        tag: "Kesehatan Ibu",
+        reminded: false
+      },
+      {
+        id: "pos-3",
+        title: "Pemberian Vitamin A & Obat Cacing Massal",
+        location: "Posyandu Mawar RW 02",
+        date: "Senin, 14 Desember 2026",
+        time: "08.00 – 10.30 WIB",
+        tag: "Suplementasi Gizi",
+        reminded: false
+      },
+      {
+        id: "pos-4",
+        title: "Demo Masak MPASI Tinggi Protein Hewani",
+        location: "Pendopo Kelurahan & Kader PKK",
+        date: "Sabtu, 20 Desember 2026",
+        time: "09.00 – 11.30 WIB",
+        tag: "Edukasi Gizi",
+        reminded: false
+      }
+    ];
+
+    const IMMUNIZATION_ITEMS = [
+      { id: "im-1", age: "0 Bulan (<24 Jam)", name: "Hepatitis B (HB-0)", benefit: "Mencegah penularan Hepatitis B dari ibu ke bayi sejak lahir" },
+      { id: "im-2", age: "1 Bulan", name: "BCG & Polio Tetes 1", benefit: "Mencegah tuberkulosis (TBC) berat dan kelumpuhan polio" },
+      { id: "im-3", age: "2 Bulan", name: "DPT-HB-Hib 1, Polio 2, PCV 1, RV 1", benefit: "Mencegah difteri, pertusis, tetanus, pneumonia & diare rotavirus" },
+      { id: "im-4", age: "3 Bulan", name: "DPT-HB-Hib 2, Polio 3, PCV 2, RV 2", benefit: "Dosis lanjutan untuk memperkuat kekebalan tubuh bayi" },
+      { id: "im-5", age: "4 Bulan", name: "DPT-HB-Hib 3, Polio 4, IPV 1, RV 3", benefit: "Perlindungan lengkap terhadap virus polio & infeksi saluran napas" },
+      { id: "im-6", age: "9 Bulan", name: "Campak-Rubella (MR) 1 & IPV 2", benefit: "Mencegah penyakit campak dan rubella yang berisiko komplikasi" },
+      { id: "im-7", age: "12 Bulan", name: "PCV 3 (Pneumokokus Lanjutan)", benefit: "Mencegah radang paru (pneumonia) dan radang telinga" },
+      { id: "im-8", age: "18 Bulan", name: "DPT-HB-Hib Lanjutan & MR Lanjutan", benefit: "Booster kekebalan jangka panjang untuk usia batita" }
+    ];
+
+    // 4. DATA AWAL FORUM KONSULTASI
+    const INITIAL_FORUM_POSTS = [
+      {
+        id: 1,
+        author: "Bunda Nabila (Ibu Arka, 7 bln)",
+        category: "MPASI",
+        title: "Apakah MPASI usia 7 bulan sudah boleh ditambah sedikit santan atau mentega?",
+        body: "Halo Bu Bidan/Ahli Gizi, berat badan anak saya bulan ini naiknya tipis. Apakah santan segar atau unsalted butter aman ditambahkan ke bubur saringnya?",
+        time: "2 jam lalu",
+        expertReply: {
+          expertName: "Siti Rahmawati, S.Gz (Ahli Gizi Puskesmas)",
+          text: "Halo Bunda Nabila! Sangat boleh dan justru dianjurkan ya Bun. Lemak tambahan seperti santan segar, unsalted butter, minyak kelapa, atau minyak ayam sangat penting untuk meningkatkan kepadatan kalori MPASI agar berat badan si kecil naik optimal dan membantu penyerapan vitamin A, D, E, K."
+        },
+        userReplies: [
+          { author: "Bunda Desi", text: "Makasih infonya Bu Gizi, anakku juga suka banget kalau buburnya dikasih santan + daun salam." }
+        ]
+      },
+      {
+        id: 2,
+        author: "Ayah Dimas (Ayah Reina, 10 bln)",
+        category: "Tumbuh Kembang",
+        title: "Anak usia 10 bulan belum bisa merangkak tapi sudah bisa duduk tegak dan merayap",
+        body: "Permisi dok/bidan, Reina usia 10 bulan sangat aktif berguling dan merayap cepat, tapi belum merangkak dengan lutut. Apakah masih dalam batas wajar?",
+        time: "5 jam lalu",
+        expertReply: {
+          expertName: "Bidan Ratna Dewi, A.Md.Keb",
+          text: "Halo Ayah Dimas. Sebagian bayi memang melewati fase merangkak atau memilih merayap (commando crawling) sebelum belajar berdiri. Selama otot kakinya kuat menopang saat diberdirikan dan respons komunikasinya baik, hal tersebut masih wajar. Perbanyak tummy time dan letakkan mainan sedikit di luar jangkauannya untuk stimulasi ya."
+        },
+        userReplies: []
+      },
+      {
+        id: 3,
+        author: "Bunda Tari (Hamil 24 Minggu)",
+        category: "Kesehatan Ibu",
+        title: "Sering merasa pusing dan cepat lelah saat trimester kedua",
+        body: "Saya hamil 24 minggu, akhir-akhir ini sering berkunang-kunang saat berdiri. Tablet tambah darah kadang lupa diminum karena mual. Ada tipsnya?",
+        time: "1 hari lalu",
+        expertReply: {
+          expertName: "Bidan Ratna Dewi, A.Md.Keb",
+          text: "Bunda Tari, keluhan tersebut mengarah pada gejala anemia kehamilan. Sebaiknya cek kadar Hb di Posyandu/Puskesmas terdekat. Tips agar tidak mual saat minum Tablet Tambah Darah (TTD): minumlah pada malam hari menjelang tidur bersama air putih atau air jeruk, dan hindari teh/kopi/susu 2 jam sebelum dan sesudah minum TTD."
+        },
+        userReplies: []
+      }
+    ];
+
+    // STATE MANAGEMENT
+    let currentTab = 'gizi';
+    let currentArticleCategory = 'Semua';
+    let currentRecipeAge = 'Semua';
+    let currentForumCategory = 'Semua';
+
+    let checkedImmunizations = JSON.parse(localStorage.getItem('giziku_immunizations') || '["im-1","im-2","im-3"]');
+    let remindedPosyandu = JSON.parse(localStorage.getItem('giziku_reminders') || '[]');
+    let forumPosts = JSON.parse(localStorage.getItem('giziku_forum') || JSON.stringify(INITIAL_FORUM_POSTS));
+
+    // TAB NAVIGATION CONTROLLER
+    function switchTab(tabName) {
+      currentTab = tabName;
+      document.querySelectorAll('.tab-section').forEach(sec => {
+        sec.classList.add('hidden');
+      });
+      const activeSec = document.getElementById(`section-${tabName}`);
+      if (activeSec) {
+        activeSec.classList.remove('hidden');
+      }
+
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('bg-sage-600', 'text-white', 'shadow-sm');
+          btn.classList.remove('text-slate-600', 'hover:bg-sage-50');
+        } else {
+          btn.classList.remove('bg-sage-600', 'text-white', 'shadow-sm');
+          btn.classList.add('text-slate-600', 'hover:bg-sage-50');
+        }
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // TOAST NOTIFICATION HELPER
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgClass = type === 'success' ? 'bg-sage-800 text-white' : 'bg-amber-600 text-white';
+      toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-lg flex items-center gap-2.5 text-xs sm:text-sm font-medium pointer-events-auto animate-[fadeSlideUp_0.25s_ease-out]`;
+      toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-300"></i><span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    // FEATURE 1A: BMI & CALORIE CALCULATOR
+    function calculateNutrition(e) {
+      if (e) e.preventDefault();
+      const weight = parseFloat(document.getElementById('calc-weight').value);
+      const heightCm = parseFloat(document.getElementById('calc-height').value);
+      const age = parseInt(document.getElementById('calc-age').value, 10);
+      const condition = document.getElementById('calc-condition').value;
+
+      if (!weight || !heightCm || heightCm <= 0) return;
+
+      const heightM = heightCm / 100;
+      const bmi = weight / (heightM * heightM);
+      const bmiRounded = bmi.toFixed(1);
+
+      let statusLabel = '';
+      let badgeClass = '';
+      let advice = '';
+
+      // Standar Klasifikasi IMT Kemenkes RI
+      if (bmi < 18.5) {
+        statusLabel = 'Berat Badan Kurang (KEK Risiko)';
+        badgeClass = 'bg-amber-100 text-amber-800';
+        advice = 'IMT berada di bawah batas normal. Tingkatkan asupan makanan padat gizi, protein hewani, serta camilan sehat bergizi seimbang.';
+      } else if (bmi >= 18.5 && bmi <= 25.0) {
+        statusLabel = 'Normal / Ideal';
+        badgeClass = 'bg-emerald-100 text-emerald-800';
+        advice = 'Status gizi Anda tergolong ideal. Pertahankan pola makan bergizi seimbang sesuai panduan Isi Piringku dan cukupi kebutuhan cairan harian.';
+      } else if (bmi > 25.0 && bmi <= 27.0) {
+        statusLabel = 'Kelebihan Berat Badan Ringan';
+        badgeClass = 'bg-orange-100 text-orange-800';
+        advice = 'Perhatikan porsi gula, garam, dan lemak jenuh. Perbanyak sayur, buah, serta aktivitas fisik ringan minimal 30 menit/hari.';
+      } else {
+        statusLabel = 'Obesitas (Perlu Pemantauan)';
+        badgeClass = 'bg-rose-100 text-rose-800';
+        advice = 'Disarankan berkonsultasi dengan Ahli Gizi di Puskesmas untuk pengaturan pola makan seimbang tanpa mengurangi zat gizi mikro.';
+      }
+
+      // Estimasi BMR Wanita (Mifflin-St Jeor) * faktor aktivitas ringan (1.375)
+      const bmr = (10 * weight) + (6.25 * heightCm) - (5 * age) - 161;
+      let totalCalories = Math.round(bmr * 1.375);
+
+      const extraMap = {
+        normal: 0,
+        hamil1: 180,
+        hamil23: 300,
+        busui1: 330,
+        busui2: 400
+      };
+      totalCalories += (extraMap[condition] || 0);
+
+      document.getElementById('bmi-value').textContent = bmiRounded;
+      const badgeEl = document.getElementById('bmi-badge');
+      badgeEl.textContent = statusLabel;
+      badgeEl.className = `px-3 py-1 rounded-full text-xs font-bold ${badgeClass}`;
+      document.getElementById('calorie-value').textContent = `${totalCalories.toLocaleString('id-ID')} kkal/hari`;
+      document.getElementById('bmi-advice').textContent = advice;
+
+      if (e) showToast('Perhitungan status gizi diperbarui!');
+    }
+
+    // FEATURE 1B: ARTICLES RENDER & FILTER
+    function setArticleCategory(cat) {
+      currentArticleCategory = cat;
+      document.querySelectorAll('.article-cat-btn').forEach(btn => {
+        if (btn.textContent.includes(cat) || (cat === 'Semua' && btn.textContent.includes('Semua'))) {
+          btn.classList.add('bg-sage-600', 'text-white');
+          btn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+        } else {
+          btn.classList.remove('bg-sage-600', 'text-white');
+          btn.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+        }
+      });
+      renderArticles();
+    }
+
+    function renderArticles() {
+      const search = (document.getElementById('article-search').value || '').toLowerCase();
+      const grid = document.getElementById('articles-grid');
+
+      const filtered = ARTICLES_DATA.filter(item => {
+        const matchCat = currentArticleCategory === 'Semua' || item.category === currentArticleCategory;
+        const matchSearch = item.title.toLowerCase().includes(search) || item.summary.toLowerCase().includes(search);
+        return matchCat && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-10 bg-white rounded-2xl border border-slate-100 text-slate-500 text-sm">Tidak ada artikel yang sesuai dengan pencarian Anda.</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(art => `
+        <article class="bg-white rounded-3xl p-5 border border-sage-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <span class="px-3 py-1 rounded-full text-[11px] font-bold ${art.color}">${art.category}</span>
+              <span class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${art.readTime}</span>
+            </div>
+            <div class="w-11 h-11 rounded-2xl ${art.color} flex items-center justify-center mb-3">
+              <i class="fa-solid ${art.icon} text-lg"></i>
+            </div>
+            <h3 class="font-display font-bold text-base sm:text-lg text-slate-800 leading-snug">
+              ${art.title}
+            </h3>
+            <p class="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              ${art.summary}
+            </p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-slate-100">
+            <button onclick="openArticleModal(${art.id})" class="w-full py-2.5 px-4 rounded-xl bg-sage-50 hover:bg-sage-600 text-sage-700 hover:text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer">
+              <span>Baca Selengkapnya</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function openArticleModal(id) {
+      const art = ARTICLES_DATA.find(a => a.id === id);
+      if (!art) return;
+      document.getElementById('modal-category').textContent = art.category;
+      document.getElementById('modal-content').innerHTML = art.content;
+      const modal = document.getElementById('detail-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    // FEATURE 2: MPASI RECIPES RENDER & FILTER
+    function setRecipeAge(age) {
+      currentRecipeAge = age;
+      document.querySelectorAll('.recipe-age-btn').forEach(btn => {
+        const isMatch = (age === 'Semua' && btn.textContent.includes('Semua')) || btn.textContent.includes(age.replace('-', '–'));
+        if (isMatch) {
+          btn.classList.add('bg-sage-600', 'text-white', 'shadow-sm');
+          btn.classList.remove('bg-white', 'text-slate-700', 'border', 'border-amber-200');
+        } else {
+          btn.classList.remove('bg-sage-600', 'text-white', 'shadow-sm');
+          btn.classList.add('bg-white', 'text-slate-700', 'border', 'border-amber-200');
+        }
+      });
+      renderRecipes();
+    }
+
+    function renderRecipes() {
+      const search = (document.getElementById('recipe-search').value || '').toLowerCase();
+      const grid = document.getElementById('recipes-grid');
+
+      const filtered = RECIPES_DATA.filter(rec => {
+        const matchAge = currentRecipeAge === 'Semua' || rec.ageGroup === currentRecipeAge;
+        const matchSearch = rec.title.toLowerCase().includes(search) || rec.ingredients.some(i => i.toLowerCase().includes(search));
+        return matchAge && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-10 bg-white rounded-2xl border border-slate-100 text-slate-500 text-sm">Resep tidak ditemukan. Coba kata kunci bahan lain seperti "ayam", "ikan", atau "telur".</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(rec => `
+        <div class="bg-white rounded-3xl overflow-hidden border border-sage-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div>
+            <!-- Visual Illustration Header -->
+            <div class="h-36 bg-gradient-to-br ${rec.iconBg} p-5 flex flex-col justify-between relative">
+              <div class="flex items-center justify-between">
+                <span class="px-3 py-1 rounded-full text-xs font-bold ${rec.badgeColor} shadow-xs">${rec.ageGroup}</span>
+                <span class="px-2.5 py-1 rounded-full bg-white/85 text-slate-700 text-[11px] font-semibold">
+                  <i class="fa-regular fa-clock text-amber-600 mr-1"></i>${rec.prepTime}
+                </span>
+              </div>
+              <div class="w-14 h-14 rounded-2xl bg-white/90 shadow-sm flex items-center justify-center text-sage-700 self-end">
+                <i class="fa-solid ${rec.icon} text-2xl"></i>
+              </div>
+            </div>
+
+            <div class="p-5">
+              <h3 class="font-display font-bold text-base sm:text-lg text-slate-800 leading-snug">
+                ${rec.title}
+              </h3>
+
+              <!-- Nutrition Highlights -->
+              <div class="grid grid-cols-3 gap-2 mt-4 bg-sage-50/70 p-2.5 rounded-2xl border border-sage-100 text-center">
+                <div>
+                  <div class="text-[10px] text-slate-500">Energi</div>
+                  <div class="text-xs font-bold text-slate-800">${rec.calories}</div>
+                </div>
+                <div class="border-x border-sage-200">
+                  <div class="text-[10px] text-slate-500">Protein</div>
+                  <div class="text-xs font-bold text-emerald-700">${rec.protein}</div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-slate-500">Zat Besi</div>
+                  <div class="text-xs font-bold text-amber-700">${rec.iron}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-5 pb-5">
+            <button onclick="openRecipeModal(${rec.id})" class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs sm:text-sm shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-book-open"></i>
+              <span>Lihat Resep Lengkap</span>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openRecipeModal(id) {
+      const rec = RECIPES_DATA.find(r => r.id === id);
+      if (!rec) return;
+      document.getElementById('modal-category').textContent = `Resep MPASI • ${rec.ageGroup}`;
+      document.getElementById('modal-content').innerHTML = `
+        <h3 class="font-display text-xl font-bold text-slate-800">${rec.title}</h3>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <span class="px-3 py-1 rounded-lg bg-sage-50 text-sage-800 font-semibold"><i class="fa-regular fa-clock mr-1"></i>Waktu: ${rec.prepTime}</span>
+          <span class="px-3 py-1 rounded-lg bg-amber-50 text-amber-800 font-semibold">Energi: ${rec.calories}</span>
+          <span class="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-semibold">Protein: ${rec.protein}</span>
+          <span class="px-3 py-1 rounded-lg bg-rose-50 text-rose-800 font-semibold">Zat Besi: ${rec.iron}</span>
+        </div>
+
+        <div class="bg-sage-50/70 p-4 rounded-2xl border border-sage-200">
+          <h4 class="font-bold text-sage-900 mb-2"><i class="fa-solid fa-basket-shopping mr-1.5 text-sage-600"></i>Bahan-Bahan:</h4>
+          <ul class="list-disc pl-5 space-y-1 text-slate-700">
+            ${rec.ingredients.map(ing => `<li>${ing}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-fire-burner mr-1.5 text-amber-600"></i>Cara Membuat:</h4>
+          <ol class="list-decimal pl-5 space-y-2 text-slate-700">
+            ${rec.steps.map(step => `<li>${step}</li>`).join('')}
+          </ol>
+        </div>
+      `;
+      const modal = document.getElementById('detail-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('detail-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Close modal on outside click
+    document.getElementById('detail-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    // FEATURE 3: POSYANDU & IMMUNIZATION TRACKER
+    function renderPosyandu() {
+      const grid = document.getElementById('posyandu-grid');
+      grid.innerHTML = POSYANDU_SCHEDULES.map(item => {
+        const isReminded = remindedPosyandu.includes(item.id);
+        return `
+          <div class="bg-white rounded-2xl p-5 border border-sage-100 shadow-sm flex flex-col justify-between gap-4">
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-sage-100 text-sage-800">${item.tag}</span>
+                <span class="text-xs font-semibold text-amber-700"><i class="fa-regular fa-calendar mr-1"></i>${item.date}</span>
+              </div>
+              <h3 class="font-display font-bold text-base text-slate-800 mt-3">${item.title}</h3>
+              <div class="mt-2 space-y-1 text-xs text-slate-600">
+                <div><i class="fa-solid fa-location-dot text-sage-600 w-4"></i> ${item.location}</div>
+                <div><i class="fa-regular fa-clock text-sage-600 w-4"></i> ${item.time}</div>
+              </div>
+            </div>
+
+            <button onclick="toggleReminder('${item.id}', '${item.title}')"
+              class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                isReminded
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                  : 'bg-sage-600 hover:bg-sage-700 text-white'
+              }">
+              <i class="fa-${isReminded ? 'solid fa-bell-slash' : 'regular fa-bell'}"></i>
+              <span>${isReminded ? 'Pengingat Aktif (Terjadwal)' : 'Ingatkan Saya'}</span>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleReminder(id, title) {
+      if (remindedPosyandu.includes(id)) {
+        remindedPosyandu = remindedPosyandu.filter(r => r !== id);
+        showToast('Pengingat jadwal Posyandu dinonaktifkan.', 'warning');
+      } else {
+        remindedPosyandu.push(id);
+        showToast(`Pengingat aktif untuk: ${title}`);
+      }
+      localStorage.setItem('giziku_reminders', JSON.stringify(remindedPosyandu));
+      renderPosyandu();
+    }
+
+    function renderImmunizations() {
+      const list = document.getElementById('immunization-list');
+      list.innerHTML = IMMUNIZATION_ITEMS.map(item => {
+        const isChecked = checkedImmunizations.includes(item.id);
+        return `
+          <label class="flex items-start gap-3.5 p-4 rounded-2xl border transition-all cursor-pointer ${
+            isChecked ? 'bg-emerald-50/70 border-emerald-200' : 'bg-slate-50/60 border-slate-200 hover:bg-white'
+          }">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleImmunization('${item.id}')"
+              class="mt-1 w-5 h-5 rounded-md accent-emerald-600 cursor-pointer shrink-0" />
+            <div class="flex-1">
+              <div class="flex flex-wrap items-center justify-between gap-1">
+                <span class="text-xs font-bold text-sage-700 bg-white px-2.5 py-0.5 rounded-full border border-sage-200">${item.age}</span>
+                <span class="text-[11px] font-semibold ${isChecked ? 'text-emerald-700' : 'text-slate-400'}">
+                  ${isChecked ? '✓ Sudah Diberikan' : 'Belum Tercatat'}
+                </span>
+              </div>
+              <div class="font-display font-bold text-sm text-slate-800 mt-1.5">${item.name}</div>
+              <p class="text-xs text-slate-600 mt-0.5">${item.benefit}</p>
+            </div>
+          </label>
+        `;
+      }).join('');
+
+      // Update Progress Bar & Hero Counter
+      const total = IMMUNIZATION_ITEMS.length;
+      const count = checkedImmunizations.length;
+      const pct = Math.round((count / total) * 100);
+      document.getElementById('immunization-progress-bar').style.width = `${pct}%`;
+      document.getElementById('immunization-percent').textContent = `${pct}%`;
+      document.getElementById('stat-imunisasi').textContent = `${count}/${total}`;
+    }
+
+    function toggleImmunization(id) {
+      if (checkedImmunizations.includes(id)) {
+        checkedImmunizations = checkedImmunizations.filter(i => i !== id);
+      } else {
+        checkedImmunizations.push(id);
+        showToast('Catatan imunisasi anak berhasil diperbarui!');
+      }
+      localStorage.setItem('giziku_immunizations', JSON.stringify(checkedImmunizations));
+      renderImmunizations();
+    }
+
+    // FEATURE 4: FORUM KONSULTASI
+    function setForumCategory(cat) {
+      currentForumCategory = cat;
+      document.querySelectorAll('.forum-cat-btn').forEach(btn => {
+        if (btn.textContent === cat) {
+          btn.classList.add('bg-sage-600', 'text-white');
+          btn.classList.remove('bg-slate-100', 'text-slate-600');
+        } else {
+          btn.classList.remove('bg-sage-600', 'text-white');
+          btn.classList.add('bg-slate-100', 'text-slate-600');
+        }
+      });
+      renderForum();
+    }
+
+    function renderForum() {
+      const container = document.getElementById('forum-list');
+      const filtered = forumPosts.filter(p => currentForumCategory === 'Semua' || p.category === currentForumCategory);
+
+      document.getElementById('stat-forum').textContent = forumPosts.length;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-sm text-slate-500 border border-slate-100">Belum ada diskusi pada kategori ini. Jadilah yang pertama bertanya!</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(post => `
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-sage-100 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center">
+                ${post.author.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div class="text-xs font-bold text-slate-800">${post.author}</div>
+                <div class="text-[11px] text-slate-400">${post.time}</div>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-sage-50 text-sage-700 border border-sage-200">${post.category}</span>
+          </div>
+
+          <div>
+            <h4 class="font-display font-bold text-base text-slate-800">${post.title}</h4>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">${post.body}</p>
+          </div>
+
+          ${post.expertReply ? `
+            <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 space-y-1.5">
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                  <i class="fa-solid fa-user-check"></i> Dijawab Ahli Gizi / Bidan
+                </span>
+                <span class="text-xs font-bold text-emerald-900">${post.expertReply.expertName}</span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">${post.expertReply.text}</p>
+            </div>
+          ` : `
+            <div class="bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2.5 text-xs text-amber-800 flex items-center gap-2">
+              <i class="fa-regular fa-clock"></i>
+              <span>Menunggu tanggapan Ahli Gizi / Bidan Posyandu...</span>
+            </div>
+          `}
+
+          <!-- User Comments -->
+          ${post.userReplies && post.userReplies.length > 0 ? `
+            <div class="pl-4 border-l-2 border-sage-200 space-y-2">
+              ${post.userReplies.map(rep => `
+                <div class="bg-slate-50 rounded-xl p-3 text-xs">
+                  <span class="font-bold text-slate-700">${rep.author}:</span>
+                  <span class="text-slate-600"> ${rep.text}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          <!-- Add Reply Form -->
+          <form onsubmit="addReply(event, ${post.id})" class="flex items-center gap-2 pt-1">
+            <input type="text" id="reply-input-${post.id}" placeholder="Tulis tanggapan atau pengalaman Bunda..." required
+              class="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-sage-500 outline-none text-xs" />
+            <button type="submit" class="px-4 py-2 rounded-xl bg-sage-100 hover:bg-sage-600 text-sage-800 hover:text-white font-semibold text-xs transition-colors cursor-pointer">
+              Balas
+            </button>
+          </form>
+        </div>
+      `).join('');
+    }
+
+    function submitQuestion(e) {
+      e.preventDefault();
+      const author = document.getElementById('q-author').value.trim();
+      const category = document.getElementById('q-category').value;
+      const title = document.getElementById('q-title').value.trim();
+      const body = document.getElementById('q-body').value.trim();
+
+      if (!author || !title || !body) return;
+
+      const newPost = {
+        id: Date.now(),
+        author,
+        category,
+        title,
+        body,
+        time: "Baru saja",
+        expertReply: null,
+        userReplies: []
+      };
+
+      forumPosts.unshift(newPost);
+      localStorage.setItem('giziku_forum', JSON.stringify(forumPosts));
+      document.getElementById('forum-form').reset();
+      setForumCategory('Semua');
+      showToast('Pertanyaan Anda berhasil dipublikasikan ke Forum!');
+    }
+
+    function addReply(e, postId) {
+      e.preventDefault();
+      const input = document.getElementById(`reply-input-${postId}`);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const post = forumPosts.find(p => p.id === postId);
+      if (post) {
+        post.userReplies = post.userReplies || [];
+        post.userReplies.push({
+          author: "Orang Tua Anggota",
+          text
+        });
+        localStorage.setItem('giziku_forum', JSON.stringify(forumPosts));
+        renderForum();
+        showToast('Balasan ditambahkan!');
+      }
+    }
+
+    // FEATURE 5: COPY WHATSAPP CHANNEL LINK
+    function copyWhatsAppLink() {
+      const link = "https://whatsapp.com/channel/giziku-posyandu-indonesia";
+      const tempInput = document.createElement('input');
+      tempInput.value = link;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      showToast('Tautan Channel WhatsApp GIZIKU berhasil disalin!');
+    }
+
+    // INITIALIZE APP ON LOAD
+    window.addEventListener('DOMContentLoaded', () => {
+      switchTab('gizi');
+      calculateNutrition(null);
+      setArticleCategory('Semua');
+      setRecipeAge('Semua');
+      renderPosyandu();
+      renderImmunizations();
+      setForumCategory('Semua');
+    });
+  </script>
+</body>
+</html>
